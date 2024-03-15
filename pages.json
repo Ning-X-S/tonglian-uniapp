@@ -17,6 +17,12 @@
 			"style": {
 				"navigationBarTitleText": "我的"
 			}
+		},
+		{
+			"path": "pages/login/index",
+			"style": {
+				"navigationBarTitleText": "登录"
+			}
 		}
 	],
 	"globalStyle": {
@@ -27,7 +33,6 @@
 	},
 	"uniIdRouter": {},
 	"tabBar": {
-		"borderStyle": "fff",
 		"selectedColor": "#3c85f3",
 		"color": "#666",
 		"backgroundColor": "#fff",
