@@ -6,10 +6,10 @@
         <view>报名入口</view>
         <view @click="back">返回首页</view>
       </view>
-      <view class="title">*报名须知</view>
-      <view class="paragraph">*报名资料审核通过才进行交费报名，否则无效；</view>
+      <view class="title">*{{detailInfo.signTitle}}</view>
+      <view class="paragraph" v-if="detailInfo.signContentOne">*{{detailInfo.signContentOne}}</view>
       <view class="paragraph"
-        >*报名缴费成功后报备负责老师，做好面试相关准备；</view
+         v-if="detailInfo.signContentTwo">*{{detailInfo.signContentTwo}}</view
       >
       <view class="form-item mt100">
         <view class="label">*姓名：</view>
@@ -29,23 +29,45 @@
 </template>
 
 <script>
+import { getRequest } from '../utils/request'
+
 export default {
   data() {
     return {
-      title: "Hello",
-      list: [
-        {
-          id: "1",
-          title: "正式报名交费入口",
-        },
-        {
-          id: "2",
-          title: "面试通过人员报到安置交费入口",
-        },
-      ],
+      detailInfo: {},
     };
   },
-  onLoad() {},
+  onLoad(options) {
+    let sessionKey = uni.getStorageSync('sessionKey')
+    let openId = uni.getStorageSync('openId')
+    if (!sessionKey || !openId) {
+      uni.navigateTo({ url: `/pages/login/index` });
+      return 
+    }
+    getRequest('/thlf/checksession',{ openid : openId, sessionKey} ).then((res) => {
+      if (res.code === 200) {
+        if (res.data.errcode === 0 ) {
+          getRequest('/thlf/getInfo', { id : options.id }).then((res) => {
+            this.detailInfo = res.data
+          })
+        } else {
+          uni.showToast({
+            title: "登录失效",
+          });
+          setTimeout(() => {
+            uni.navigateTo({ url: `/pages/login/index` });
+          }, 1000)
+        }
+      } else {
+        uni.showToast({
+          title: "登录失效",
+        });
+        setTimeout(() => {
+          uni.navigateTo({ url: `/pages/login/index` });
+        }, 1000)
+      }
+    })
+  },
   methods: {
     back() {
       uni.navigateBack({
@@ -102,7 +124,7 @@ export default {
     align-content: center;
     margin-bottom: 20rpx;
     .label {
-      width: 200rpx;
+      width: 240rpx;
       text-align: center;
       line-height: 64rpx;
     }

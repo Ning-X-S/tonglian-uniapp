@@ -19,6 +19,12 @@
 			}
 		},
 		{
+			"path": "pages/list/index",
+			"style": {
+				"navigationBarTitleText": "交易列表"
+			}
+		},
+		{
 			"path": "pages/login/index",
 			"style": {
 				"navigationBarTitleText": "登录"

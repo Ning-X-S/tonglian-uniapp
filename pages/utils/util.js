@@ -1,20 +1,30 @@
+
+import { getRequest } from '../utils/request'
+
 // 服务端接口 - 获取openid
 function queryOpenIdFn(code) {
   console.log(code)
   return new Promise(resolve => {
-    // queryOpenId({
-    //   code
-    // }).then(res => {
-    //   if (res.code !== 0) {
-    //     console.log('获取openid失败1：', res.msg);
-    //     return
-    //   }
-    //   uni.setStorageSync('openId', res.content.openid)
-    //   resolve(res.content)
-    // })
-    //   .catch(err => {
-    //     console.log('获取openid失败2：', err);
-    //   })
+    resolve(code)
+    getRequest("/thlf/auth", {
+      code
+    }).then(res => {
+      if (res.code !== 200) {
+        uni.showToast({
+          title: "登录失败",
+        });
+        return
+      }
+      uni.setStorageSync('sessionKey', res.data.session_key)
+      uni.setStorageSync('openId', res.data.openid)
+      resolve(res.data)
+    })
+      .catch(err => {
+        uni.showToast({
+          title: "登录失败",
+        });
+        console.log('获取openid失败2：', err);
+      })
   })
 }
 
@@ -43,10 +53,14 @@ function loginFn() {
     uni.login({
       success: async (res) => {
         queryOpenIdFn(res.code).then(res => {
+          console.log(res)
           resolve(res)
         })
       },
       fail: (err) => {
+        uni.showToast({
+          title: "登录失败",
+        });
         console.log('login fail:', err);
       }
     })

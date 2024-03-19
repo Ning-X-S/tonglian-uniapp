@@ -3,25 +3,24 @@
     <view class="info">
       <view
         class="info-line-avatar border-item"
-        @click="navigateTo('/pages/login/index')"
       >
         <view class="avatar">
-          <image :src="info.avatar"></image>
+          <image :src="userInfo.avatarUrl"></image>
         </view>
-        <u-icon name="arrow-right"></u-icon>
+        <text>{{userInfo.nickName}}</text>
       </view>
       <view
         class="info-line border-item"
-        @click="navigateTo('/pages/login/index')"
+        @click="navigateTo('/pages/list/index')"
       >
         <view class="left">
-          <text>编辑资料</text>
+          <text>交易记录</text>
         </view>
         <u-icon name="arrow-right"></u-icon>
       </view>
-      <view class="info-line" @click="navigateTo('setting')">
+      <view class="info-line" @click="logout">
         <view class="left">
-          <text>设置</text>
+          <text>退出登录</text>
         </view>
         <u-icon name="arrow-right"></u-icon>
       </view>
@@ -30,19 +29,58 @@
 </template>
 
 <script>
+import { getRequest } from '../utils/request'
 export default {
   data() {
     return {
       title: "Hello",
-      info: {
-        avatar: "../../static/touxiang.png",
-        name: "admin",
-        status: "工作中，勿扰~",
+      userInfo: {
+        avatarUrl: "../../static/touxiang.png",
+        nickName: "admin",
       },
     };
   },
   onLoad() {},
-  methods: {},
+  onShow() {
+    let sessionKey = uni.getStorageSync('sessionKey')
+    let openId = uni.getStorageSync('openId')
+    if (!sessionKey || !openId) {
+      uni.navigateTo({ url: `/pages/login/index` });
+      return 
+    }
+    getRequest('/thlf/checksession',{ openid : openId, sessionKey} ).then((res) => {
+      if (res.code === 200) {
+        if (res.data.errcode === 0 ) {
+          this.userInfo = uni.getStorageSync('userInfo')
+        } else {
+          uni.showToast({
+            title: "登录失效",
+          });
+          setTimeout(() => {
+            uni.navigateTo({ url: `/pages/login/index` });
+          }, 1000)
+        }
+      } else {
+        uni.showToast({
+          title: "登录失效",
+        });
+        setTimeout(() => {
+          uni.navigateTo({ url: `/pages/login/index` });
+        }, 1000)
+      }
+    })
+  },
+  methods: {
+    logout() {
+      uni.setStorageSync('sessionKey', '')
+      uni.setStorageSync('openId', '')
+      uni.setStorageSync('userInfo', '')
+      uni.navigateTo({ url: `/pages/login/index` });
+    },
+    navigateTo(url) {
+      uni.navigateTo({ url });
+    },
+  },
 };
 </script>
 
@@ -69,6 +107,7 @@ export default {
         image {
           width: 150rpx;
           height: 150rpx;
+          border-radius: 50%;
         }
       }
     }
