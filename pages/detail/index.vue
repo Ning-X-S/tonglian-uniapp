@@ -6,72 +6,137 @@
         <view>报名入口</view>
         <view @click="back">返回首页</view>
       </view>
-      <view class="title">*{{detailInfo.signTitle}}</view>
-      <view class="paragraph" v-if="detailInfo.signContentOne">*{{detailInfo.signContentOne}}</view>
-      <view class="paragraph"
-         v-if="detailInfo.signContentTwo">*{{detailInfo.signContentTwo}}</view
+      <view class="title">*{{ detailInfo.signTitle }}</view>
+      <view class="paragraph" v-if="detailInfo.signContentOne"
+        >*{{ detailInfo.signContentOne }}</view
+      >
+      <view class="paragraph" v-if="detailInfo.signContentTwo"
+        >*{{ detailInfo.signContentTwo }}</view
       >
       <view class="form-item mt100">
         <view class="label">*姓名：</view>
-        <input type="text" placeholder="请输入" />
+        <input type="text" placeholder="请输入" v-model="name" />
       </view>
       <view class="form-item">
         <view class="label">*应聘岗位：</view>
-        <input type="text" placeholder="请输入" />
+        <input type="text" placeholder="请输入" v-model="post" />
       </view>
       <view class="form-item">
         <view class="label">*金额（元）：</view>
-        <input type="number" placeholder="请输入" />
+        <input type="digit" placeholder="请输入" v-model="amount" />
       </view>
-      <button type="primary" class="btn">交费报名</button>
+      <button type="primary" class="btn" @click="submit">交费报名</button>
     </view>
   </view>
 </template>
 
 <script>
-import { getRequest } from '../utils/request'
+import { getRequest, postRequest } from "../utils/request";
 
 export default {
   data() {
     return {
-      detailInfo: {},
+      detailInfo: {
+        signTitle: '',
+        signContentOne: '',
+        signContentTwo: ''
+      },
+      name: "",
+      post: "",
+      amount: "",
     };
   },
   onLoad(options) {
-    let sessionKey = uni.getStorageSync('sessionKey')
-    let openId = uni.getStorageSync('openId')
+    let sessionKey = uni.getStorageSync("sessionKey");
+    let openId = uni.getStorageSync("openId");
     if (!sessionKey || !openId) {
       uni.navigateTo({ url: `/pages/login/index` });
-      return 
+      return;
     }
-    getRequest('/thlf/checksession',{ openid : openId, sessionKey} ).then((res) => {
-      if (res.code === 200) {
-        if (res.data.errcode === 0 ) {
-          getRequest('/thlf/getInfo', { id : options.id }).then((res) => {
-            this.detailInfo = res.data
-          })
+    getRequest("/thlf/checksession", { openid: openId, sessionKey }).then(
+      (res) => {
+        if (res.code === 200) {
+          if (res.data.errcode === 0) {
+            getRequest("/thlf/getInfo", { id: options.id }).then((res) => {
+              this.detailInfo = res.data;
+            });
+          } else {
+            uni.showToast({
+              title: "登录失效",
+              icon: 'none'
+            });
+            setTimeout(() => {
+              uni.navigateTo({ url: `/pages/login/index` });
+            }, 1000);
+          }
         } else {
           uni.showToast({
             title: "登录失效",
+            icon: 'none'
           });
           setTimeout(() => {
             uni.navigateTo({ url: `/pages/login/index` });
-          }, 1000)
+          }, 1000);
         }
-      } else {
-        uni.showToast({
-          title: "登录失效",
-        });
-        setTimeout(() => {
-          uni.navigateTo({ url: `/pages/login/index` });
-        }, 1000)
       }
-    })
+    );
   },
   methods: {
     back() {
       uni.navigateBack({
         delta: 1,
+      });
+    },
+    submit() {
+      if (!this.name) {
+        uni.showToast({
+          title: "请输入姓名",
+        });
+        return;
+      }
+      if (!this.post) {
+        uni.showToast({
+          title: "请输入应聘岗位",
+        });
+        return;
+      }
+      if (!this.amount) {
+        uni.showToast({
+          title: "请输入金额",
+        });
+        return;
+      }
+      let data = {
+        openid: uni.getStorageSync("openId"),
+        name: this.name,
+        amount: this.amount,
+        post: this.post,
+      };
+      postRequest("/thlf/submitorder", data).then((res) => {
+        wx.requestPayment({
+          timeStamp: res.data.timeStamp,
+          nonceStr: res.data.nonceStr,
+          package: res.data.package,
+          signType: res.data.signType,
+          paySign: res.data.paySign,
+          success: function (res) {
+            uni.showToast({
+              title: "支付成功",
+              icon: 'success',
+              duration: 1000
+            });
+            setTimeout(() => {
+              uni.switchTab({ url: `/pages/index/index` });
+            }, 1500);
+          },
+          fail: function (res) {
+            uni.showToast({
+              title: "支付失败",
+              icon: 'none'
+            });
+          },
+          complete: function (res) {},
+        });
       });
     },
   },

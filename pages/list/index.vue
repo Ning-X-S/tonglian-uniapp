@@ -39,6 +39,7 @@ export default {
         } else {
           uni.showToast({
             title: "登录失效",
+            icon: 'none'
           });
           setTimeout(() => {
             uni.navigateTo({ url: `/pages/login/index` });
@@ -47,6 +48,7 @@ export default {
       } else {
         uni.showToast({
           title: "登录失效",
+          icon: 'none'
         });
         setTimeout(() => {
           uni.navigateTo({ url: `/pages/login/index` });

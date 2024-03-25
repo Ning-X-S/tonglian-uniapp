@@ -44,6 +44,7 @@ export default {
           }).catch(() => {
             uni.showToast({
               title: "登录失败",
+              icon: 'none'
             });
           });
         }

@@ -1,6 +1,6 @@
 //  request.js 里面
 
-const fmmUrl = "http://192.168.0.101:8083";  // 这里放自己的接口名称
+const fmmUrl = "http://7kgaq7.natappfree.cc";  // 这里放自己的接口名称
 
 // get 请求
 function getRequest(url,data) {

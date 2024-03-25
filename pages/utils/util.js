@@ -12,6 +12,7 @@ function queryOpenIdFn(code) {
       if (res.code !== 200) {
         uni.showToast({
           title: "登录失败",
+          icon: 'none'
         });
         return
       }
@@ -22,6 +23,7 @@ function queryOpenIdFn(code) {
       .catch(err => {
         uni.showToast({
           title: "登录失败",
+          icon: 'none'
         });
         console.log('获取openid失败2：', err);
       })
@@ -60,6 +62,7 @@ function loginFn() {
       fail: (err) => {
         uni.showToast({
           title: "登录失败",
+          icon: 'none'
         });
         console.log('login fail:', err);
       }
